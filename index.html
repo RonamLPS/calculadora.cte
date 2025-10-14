@@ -257,10 +257,10 @@
       const API_KEY =
         "5b3ce3597851110001cf6248134736816a3a48aaaa53d6ffa44015cc";
       const coordenadasUsinas = {
-        Cambuí: [-17.92361231386585, -50.63487236076896],
-        "Vale do Verdão": [-17.968437667089518, -50.31720625869443],
-        Panorama: [-18.338855443317613, -49.864912377453436],
-        Floresta: [-17.617099847214824, -50.715637204456264],
+        Cambuí: [-17.81028815301374, -50.58916331966229],
+        "Vale do Verdão": [-17.853405713053114, -50.30499911554991],
+        Panorama: [-18.39517904496636, -49.29782840539294],
+        Floresta: [-17.558509821464106, -50.63450289597277],
       };
 
       let cidades = [];
@@ -294,14 +294,15 @@
       // Funções para cálculo de frete
       function calcularPrecoEtanol(pesoBruto) {
         const precosPorFaixa = [
-          { min: 0, max: 4, preco: 1 },
-          { min: 4.01, max: 10, preco: 2.02 },
-          { min: 10.01, max: 15, preco: 2.76 },
-          { min: 15.01, max: 20, preco: 3.43 },
-          { min: 20.01, max: 30, preco: 4.69 },
-          { min: 30.01, max: 48, preco: 6.71 },
-          { min: 48.01, max: Infinity, preco: 8.66 },
-        ];
+        		{ min: 0, max: 4, preco: 1.07 },
+        		{ min: 4.01, max: 10, preco: 2.15 },
+        		{ min: 10.01, max: 15, preco: 2.94 },
+        		{ min: 15.01, max: 20, preco: 3.66 },
+        		{ min: 20.01, max: 30, preco: 5.00 },
+        		{ min: 30.01, max: 48, preco: 7.16 },
+        		{ min: 48.01, max: Infinity, preco: 9.23 },
+      	];
+
         return (
           precosPorFaixa.find(
             (faixa) => pesoBruto >= faixa.min && pesoBruto <= faixa.max
@@ -311,41 +312,42 @@
 
       function calcularPrecoAcucar(distancia) {
         const precosPorFaixa = [
-          { min: 1, max: 25, preco: 23.87 },
-          { min: 26, max: 50, preco: 31.49 },
-          { min: 51, max: 100, preco: 36.29 },
-          { min: 101, max: 150, preco: 39.9 },
-          { min: 151, max: 200, preco: 42.67 },
-          { min: 201, max: 250, preco: 45.97 },
-          { min: 251, max: 300, preco: 50.52 },
-          { min: 301, max: 350, preco: 55.6 },
-          { min: 351, max: 400, preco: 63.33 },
-          { min: 401, max: 450, preco: 71.09 },
-          { min: 451, max: 500, preco: 78.83 },
-          { min: 501, max: 600, preco: 90.44 },
-          { min: 601, max: 700, preco: 105.92 },
-          { min: 701, max: 800, preco: 121.42 },
-          { min: 801, max: 900, preco: 136.9 },
-          { min: 901, max: 1000, preco: 152.39 },
-          { min: 1001, max: 1100, preco: 167.88 },
-          { min: 1101, max: 1200, preco: 183.36 },
-          { min: 1201, max: 1300, preco: 198.85 },
-          { min: 1301, max: 1400, preco: 214.34 },
-          { min: 1401, max: 1500, preco: 229.82 },
-          { min: 1501, max: 1600, preco: 245.31 },
-          { min: 1601, max: 1700, preco: 260.8 },
-          { min: 1701, max: 1800, preco: 276.28 },
-          { min: 1801, max: 1900, preco: 291.78 },
-          { min: 1901, max: 2000, preco: 307.26 },
-          { min: 2001, max: 2200, preco: 330.49 },
-          { min: 2201, max: 2400, preco: 361.46 },
-          { min: 2401, max: 2600, preco: 392.43 },
-          { min: 2601, max: 2800, preco: 423.42 },
-          { min: 2801, max: 3000, preco: 454.39 },
-          { min: 3001, max: 3400, preco: 500.85 },
-          { min: 3401, max: 3800, preco: 562.79 },
-          { min: 3801, max: Infinity, preco: 624.73 },
-        ];
+        		{ min: 1, max: 25, preco: 25.52 },
+        		{ min: 26, max: 50, preco: 33.67 },
+        		{ min: 51, max: 100, preco: 38.80 },
+        		{ min: 101, max: 150, preco: 42.66 },
+        		{ min: 151, max: 200, preco: 45.62 },
+        		{ min: 201, max: 250, preco: 49.15 },
+        		{ min: 251, max: 300, preco: 54.01 },
+        		{ min: 301, max: 350, preco: 59.45 },
+        		{ min: 351, max: 400, preco: 67.71 },
+        		{ min: 401, max: 450, preco: 76.00 },
+        		{ min: 451, max: 500, preco: 84.28 },
+        		{ min: 501, max: 600, preco: 96.69 },
+        		{ min: 601, max: 700, preco: 113.25 },
+        		{ min: 701, max: 800, preco: 129.82 },
+        		{ min: 801, max: 900, preco: 146.36 },
+        		{ min: 901, max: 1000, preco: 162.93 },
+        		{ min: 1001, max: 1100, preco: 179.49 },
+        		{ min: 1101, max: 1200, preco: 196.05 },
+        		{ min: 1201, max: 1300, preco: 212.60 },
+        		{ min: 1301, max: 1400, preco: 229.16 },
+        		{ min: 1401, max: 1500, preco: 245.72 },
+        		{ min: 1501, max: 1600, preco: 262.27 },
+        		{ min: 1601, max: 1700, preco: 278.84 },
+        		{ min: 1701, max: 1800, preco: 295.39 },
+        		{ min: 1801, max: 1900, preco: 311.96 },
+        		{ min: 1901, max: 2000, preco: 328.51 },
+        		{ min: 2001, max: 2200, preco: 353.35 },
+        		{ min: 2201, max: 2400, preco: 386.46 },
+        		{ min: 2401, max: 2600, preco: 419.58 },
+        		{ min: 2601, max: 2800, preco: 452.70 },
+        		{ min: 2801, max: 3000, preco: 485.81 },
+        		{ min: 3001, max: 3400, preco: 535.48 },
+        		{ min: 3401, max: 3800, preco: 601.71 },
+        		{ min: 3801, max: 4200, preco: 667.94 },
+      	];
+
 
         return (
           precosPorFaixa.find(
@@ -440,7 +442,7 @@
               const nomeCidade = cidade.nome;
 
               // Usa encadeamento opcional para evitar erros
-              const siglaUF = cidade.microrregiao?.mesorregiao?.UF?.sigla || "";
+              const siglaUF = cidade.microrregiao?.mesorregiao?.UF?.nome || "";
 
               return `${nomeCidade}-${siglaUF}`;
             })
@@ -685,5 +687,6 @@
     </script>
   </body>
 </html>
+
 
 
