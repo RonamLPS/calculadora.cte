@@ -11,6 +11,7 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <title>Calcular valor CT-e</title>
     <style>
       body {
@@ -71,6 +72,81 @@
       }
       .spinner-border {
         animation-duration: 0.8s;
+      }
+      
+      /* Estilos para o mapa */
+      #mapa-rota {
+        height: 400px;
+        width: 100%;
+        border-radius: 0.375rem;
+        z-index: 1;
+      }
+      
+      .route-info {
+        background-color: #343a40;
+        border-radius: 0.375rem;
+        padding: 15px;
+        margin-top: 15px;
+      }
+      
+      .route-details {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+      
+      .route-detail-item {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        padding: 10px;
+        border-right: 1px solid #495057;
+      }
+      
+      .route-detail-item:last-child {
+        border-right: none;
+      }
+      
+      .route-detail-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #0dcaf0;
+      }
+      
+      .route-detail-label {
+        font-size: 0.85rem;
+        color: #adb5bd;
+      }
+      
+      .leaflet-container {
+        background: #343a40 !important;
+      }
+      
+      .hidden {
+        display: none !important;
+      }
+      
+      .route-btn-container {
+        height: 38px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+      }
+      
+      .fade-in {
+        animation: fadeIn 0.5s ease-in;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .success-message {
+        color: #198754;
+        font-weight: bold;
       }
     </style>
   </head>
@@ -141,6 +217,24 @@
             </div>
           </div>
           <p id="resultado" class="text-center mt-3"><br /></p>
+          
+          <!-- Botão para visualizar rota -->
+          <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+              <div id="route-btn-container" class="route-btn-container hidden">
+                <button 
+                  id="btn-ver-rota" 
+                  class="btn btn-outline-info fade-in" 
+                  onclick="visualizarRota()"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-map" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103zM10 1.91l-4-.8v12.98l4 .8V1.91zm1 12.98 4-.8V1.11l-4 .8v12.98zm-6-.8V1.11l-4 .8v12.98l4-.8z"/>
+                  </svg>
+                  Visualizar Rota
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Seção Etanol -->
@@ -253,17 +347,59 @@
       </div>
     </section>
 
+    <!-- Modal para visualizar rota -->
+    <div class="modal fade" id="modalRota" tabindex="-1" aria-labelledby="modalRotaLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalRotaLabel">Visualização da Rota</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="mapa-rota"></div>
+            <div id="info-rota" class="route-info" style="display: none;">
+              <h6>Detalhes da Rota</h6>
+              <div class="route-details">
+                <div class="route-detail-item">
+                  <div class="route-detail-value" id="distancia-rota">-</div>
+                  <div class="route-detail-label">Distância</div>
+                </div>
+                <div class="route-detail-item">
+                  <div class="route-detail-value" id="duracao-rota">-</div>
+                  <div class="route-detail-label">Duração</div>
+                </div>
+                <div class="route-detail-item">
+                  <div class="route-detail-value" id="origem-rota">-</div>
+                  <div class="route-detail-label">Origem</div>
+                </div>
+                <div class="route-detail-item">
+                  <div class="route-detail-value" id="destino-rota">-</div>
+                  <div class="route-detail-label">Destino</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-      const API_KEY =
-        "5b3ce3597851110001cf6248134736816a3a48aaaa53d6ffa44015cc";
+      const API_KEY = "5b3ce3597851110001cf6248134736816a3a48aaaa53d6ffa44015cc";
       const coordenadasUsinas = {
         Cambuí: [-17.81028815301374, -50.58916331966229],
-        "Vale do Verdão": [-17.852603866776573, -50.305027670546075],
+        "Vale do Verdão": [-17.965310652201534, -50.31881436439552],
         Panorama: [-18.39517904496636, -49.29782840539294],
         Floresta: [-17.558509821464106, -50.63450289597277],
       };
 
       let cidades = [];
+      let mapa = null;
+      let rotaLayer = null;
 
       // Função para alternar entre produtos
       function setupProductToggle() {
@@ -347,7 +483,6 @@
         		{ min: 3401, max: 3800, preco: 601.71 },
         		{ min: 3801, max: 4200, preco: 667.94 },
       	];
-
 
         return (
           precosPorFaixa.find(
@@ -565,6 +700,9 @@
         const cidade = document.getElementById("destino").value;
         const resultadoDiv = document.getElementById("resultado");
 
+        // Esconder botão de rota ao iniciar novo cálculo
+        document.getElementById("route-btn-container").classList.add("hidden");
+
         // Efeito fade out antes de atualizar
         resultadoDiv.style.opacity = "0";
         resultadoDiv.style.transition = "opacity 0.3s ease";
@@ -581,7 +719,7 @@
           // Efeito fade in
           resultadoDiv.style.opacity = "1";
 
-          resultadoDiv.classList.remove("error");
+          resultadoDiv.classList.remove("error", "success-message");
           resultadoDiv.style.display = "flex"; 
           resultadoDiv.style.minHeight = "40px";
 
@@ -625,14 +763,14 @@
               parseFloat(lon)
             );
           } else {
-            document.getElementById("resultado").textContent =
-              "Cidade não encontrada.";
+            document.getElementById("resultado").innerHTML =
+              '<span class="text-danger">Cidade não encontrada.</span>';
             document.getElementById("resultado").classList.add("error");
           }
         } catch (erro) {
           console.error("Erro ao buscar coordenadas:", erro);
-          document.getElementById("resultado").textContent =
-            "Erro ao buscar cidade.";
+          document.getElementById("resultado").innerHTML =
+            '<span class="text-danger">Erro ao buscar cidade.</span>';
           document.getElementById("resultado").classList.add("error");
         }
       }
@@ -649,6 +787,8 @@
             [lon1, lat1],
             [lon2, lat2],
           ],
+          instructions: false,
+          geometry: true
         });
 
         try {
@@ -658,18 +798,43 @@
             body,
           });
 
+          if (!res.ok) {
+            throw new Error(`Erro na API: ${res.status} ${res.statusText}`);
+          }
+
           const data = await res.json();
+          
+          if (!data.routes || data.routes.length === 0) {
+            throw new Error("Nenhuma rota encontrada");
+          }
+          
           const metros = data.routes[0].summary.distance;
           const km = metros / 1000;
 
-          document.getElementById(
-            "resultado"
-          ).textContent = `Distância: ${km.toFixed(2)} km`;
+          document.getElementById("resultado").innerHTML = 
+            `<span>Distância calculada: ${km.toFixed(2)} km</span>`;
+          
           inserirDistanciaNosInputs(km.toFixed(0));
+          
+          // Mostrar botão de visualizar rota
+          mostrarBotaoRota();
+          
+          // Salvar dados da rota para visualização posterior
+          sessionStorage.setItem('rotaData', JSON.stringify({
+            origem: document.getElementById("origem").value,
+            destino: document.getElementById("destino").value,
+            coordenadas: {
+              origem: [lat1, lon1],
+              destino: [lat2, lon2]
+            },
+            distancia: km,
+            duracao: data.routes[0].summary.duration,
+            geometry: data.routes[0].geometry
+          }));
         } catch (erro) {
           console.error("Erro ao calcular rota:", erro);
-          document.getElementById("resultado").textContent =
-            "Erro ao calcular rota.";
+          document.getElementById("resultado").innerHTML =
+            '<span class="text-danger">Erro ao calcular rota. Verifique sua conexão e tente novamente.</span>';
           document.getElementById("resultado").classList.add("error");
         }
       }
@@ -677,6 +842,208 @@
       function inserirDistanciaNosInputs(distancia) {
         document.getElementById("distancia-etanol").value = distancia;
         document.getElementById("distancia-acucar").value = distancia;
+      }
+
+      // Mostrar botão de visualizar rota
+      function mostrarBotaoRota() {
+        const routeBtnContainer = document.getElementById("route-btn-container");
+        routeBtnContainer.classList.remove("hidden");
+        routeBtnContainer.classList.add("fade-in");
+      }
+
+      // Função para visualizar rota
+      function visualizarRota() {
+        const rotaData = JSON.parse(sessionStorage.getItem('rotaData'));
+        
+        if (!rotaData) {
+          alert('Nenhuma rota calculada para visualizar.');
+          return;
+        }
+        
+        // Exibir modal
+        const modalRota = new bootstrap.Modal(document.getElementById('modalRota'));
+        modalRota.show();
+        
+        // Inicializar mapa após o modal ser exibido
+        document.getElementById('modalRota').addEventListener('shown.bs.modal', function () {
+          inicializarMapa();
+          adicionarRotaAoMapa(rotaData);
+          atualizarInfoRota(rotaData);
+        });
+      }
+
+      // Inicializar mapa
+      function inicializarMapa() {
+        // Limpar mapa existente
+        if (mapa) {
+          mapa.remove();
+        }
+        
+        // Obter dados da rota
+        const rotaData = JSON.parse(sessionStorage.getItem('rotaData'));
+        if (!rotaData) return;
+        
+        const { coordenadas } = rotaData;
+        
+        // Calcular centro do mapa
+        const centerLat = (coordenadas.origem[0] + coordenadas.destino[0]) / 2;
+        const centerLon = (coordenadas.origem[1] + coordenadas.destino[1]) / 2;
+        
+        // Inicializar mapa
+        mapa = L.map('mapa-rota').setView([centerLat, centerLon], 6);
+        
+        // Adicionar tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mapa);
+      }
+
+      // Adicionar rota ao mapa
+      function adicionarRotaAoMapa(rotaData) {
+        const { coordenadas, origem, destino, geometry } = rotaData;
+        
+        // Limpar rota anterior
+        if (rotaLayer) {
+          mapa.removeLayer(rotaLayer);
+        }
+        
+        // Adicionar marcadores de origem e destino
+        const origemIcon = L.divIcon({
+          html: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#20c997" class="bi bi-geo-alt-fill" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>',
+          className: 'custom-div-icon',
+          iconSize: [24, 24],
+          iconAnchor: [12, 24]
+        });
+        
+        const destinoIcon = L.divIcon({
+          html: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#dc3545" class="bi bi-geo-alt-fill" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>',
+          className: 'custom-div-icon',
+          iconSize: [24, 24],
+          iconAnchor: [12, 24]
+        });
+        
+        L.marker(coordenadas.origem, {icon: origemIcon})
+          .addTo(mapa)
+          .bindPopup(`<b>Origem:</b> ${origem}`)
+          .openPopup();
+        
+        L.marker(coordenadas.destino, {icon: destinoIcon})
+          .addTo(mapa)
+          .bindPopup(`<b>Destino:</b> ${destino}`);
+        
+        // Adicionar rota ao mapa se a geometria estiver disponível
+        if (geometry) {
+          try {
+            // Converter geometria codificada (se estiver codificada)
+            const routeCoordinates = decodePolyline(geometry);
+            
+            // Criar linha da rota
+            rotaLayer = L.polyline(routeCoordinates, {
+              color: '#0d6efd',
+              weight: 5,
+              opacity: 0.7,
+              lineJoin: 'round'
+            }).addTo(mapa);
+            
+            // Ajustar visualização para mostrar toda a rota
+            mapa.fitBounds(rotaLayer.getBounds(), { padding: [20, 20] });
+          } catch (error) {
+            console.error("Erro ao decodificar geometria da rota:", error);
+            // Fallback: criar linha reta entre origem e destino
+            rotaLayer = L.polyline([coordenadas.origem, coordenadas.destino], {
+              color: '#0d6efd',
+              weight: 5,
+              opacity: 0.7,
+              lineJoin: 'round',
+              dashArray: '10, 10'
+            }).addTo(mapa);
+            
+            // Ajustar visualização
+            mapa.fitBounds(rotaLayer.getBounds(), { padding: [20, 20] });
+          }
+        } else {
+          // Fallback: criar linha reta entre origem e destino
+          rotaLayer = L.polyline([coordenadas.origem, coordenadas.destino], {
+            color: '#0d6efd',
+            weight: 5,
+            opacity: 0.7,
+            lineJoin: 'round',
+            dashArray: '10, 10'
+          }).addTo(mapa);
+          
+          // Ajustar visualização
+          mapa.fitBounds(rotaLayer.getBounds(), { padding: [20, 20] });
+        }
+      }
+
+      // Decodificar polyline (formato da OpenRouteService)
+      function decodePolyline(encoded) {
+        if (!encoded) return [];
+        
+        // Verificar se já está em formato de coordenadas
+        if (Array.isArray(encoded) && encoded[0] && Array.isArray(encoded[0])) {
+          return encoded;
+        }
+        
+        // Se for string, tentar decodificar
+        if (typeof encoded === 'string') {
+          const points = [];
+          let index = 0, len = encoded.length;
+          let lat = 0, lng = 0;
+          
+          while (index < len) {
+            let b, shift = 0, result = 0;
+            do {
+              b = encoded.charCodeAt(index++) - 63;
+              result |= (b & 0x1f) << shift;
+              shift += 5;
+            } while (b >= 0x20);
+            let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+            
+            shift = 0;
+            result = 0;
+            do {
+              b = encoded.charCodeAt(index++) - 63;
+              result |= (b & 0x1f) << shift;
+              shift += 5;
+            } while (b >= 0x20);
+            let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+            
+            points.push([lat * 1e-5, lng * 1e-5]);
+          }
+          
+          return points;
+        }
+        
+        return [];
+      }
+
+      // Atualizar informações da rota
+      function atualizarInfoRota(rotaData) {
+        const { distancia, duracao, origem, destino } = rotaData;
+        
+        // Formatar distância
+        const distanciaFormatada = distancia >= 1 
+          ? `${distancia.toFixed(1)} km` 
+          : `${(distancia * 1000).toFixed(0)} m`;
+        
+        // Formatar duração
+        const horas = Math.floor(duracao / 3600);
+        const minutos = Math.floor((duracao % 3600) / 60);
+        const duracaoFormatada = horas > 0 
+          ? `${horas}h ${minutos}min` 
+          : `${minutos} min`;
+        
+        // Atualizar elementos
+        document.getElementById('distancia-rota').textContent = distanciaFormatada;
+        document.getElementById('duracao-rota').textContent = duracaoFormatada;
+        document.getElementById('origem-rota').textContent = origem;
+        document.getElementById('destino-rota').textContent = destino;
+        
+        // Exibir informações
+        document.getElementById('info-rota').style.display = 'block';
       }
 
       // Inicialização
@@ -687,8 +1054,3 @@
     </script>
   </body>
 </html>
-
-
-
-
-
