@@ -579,7 +579,7 @@
               // Usa encadeamento opcional para evitar erros
               const siglaUF = cidade.microrregiao?.mesorregiao?.UF?.nome || "";
 
-              return `${nomeCidade}-${siglaUF}`;
+              return `${nomeCidade}, ${siglaUF}`;
             })
             .sort();
         } catch (erro) {
@@ -1054,4 +1054,5 @@
     </script>
   </body>
 </html>
+
 
